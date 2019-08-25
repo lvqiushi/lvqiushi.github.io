@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>分库分表下分页查询解决方案 | Lv's Blogs</title><meta name="description" content="分库分表下分页查询解决方案"><meta name="keywords" content><meta name="author" content="lvqiushi"><meta name="copyright" content="lvqiushi"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="canonical" href="https://lvqiushi.github.io/2019/08/25/page-twice/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="分库分表下分页查询解决方案"><meta name="twitter:description" content="分库分表下分页查询解决方案"><meta name="twitter:image" content="https://lvqiushi.github.io/cover/page.jpeg"><meta property="og:type" content="article"><meta property="og:title" content="分库分表下分页查询解决方案"><meta property="og:url" content="https://lvqiushi.github.io/2019/08/25/page-twice/"><meta property="og:site_name" content="Lv's Blogs"><meta property="og:description" content="分库分表下分页查询解决方案"><meta property="og:image" content="https://lvqiushi.github.io/cover/page.jpeg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="next" title="开山之剑-第一篇博客" href="https://lvqiushi.github.io/2019/08/19/preface/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://lvqiushi.github.io","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight_copy: 'true',
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: '添加书签',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天'
+
+  
+}</script></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#分库分表下分页查询解决方案"><span class="toc-number">1.</span> <span class="toc-text">分库分表下分页查询解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-目前大多数的解决方案"><span class="toc-number">1.1.</span> <span class="toc-text">1 目前大多数的解决方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-APP上的下拉式分页"><span class="toc-number">1.2.</span> <span class="toc-text">2 APP上的下拉式分页</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-普通的分页查询"><span class="toc-number">1.3.</span> <span class="toc-text">3 普通的分页查询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-查询精度要求很低"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 查询精度要求很低</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-查询精度一般-二次查询"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 查询精度一般-二次查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-查询精度不允许损失-双写"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 查询精度不允许损失-双写</span></a></li></ol></li></ol></li></ol></div></div></div><div id="content-outer"><div id="top-container" style="background-image: url(/topic/page.jpg)"><div id="page-header"><span class="pull-left"> <a class="blog_title" id="site-name" href="/">Lv's Blogs</a></span><div class="open toggle-menu pull-right"><div class="menu-icon-first"></div><div class="menu-icon-second"></div><div class="menu-icon-third"></div></div><span class="pull-right menus"><div class="mobile_author_icon"><img class="lozad" src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'"><div class="mobile_author-info__description">If you want,you can.</div></div><hr><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a><script>document.body.addEventListener('touchstart', function(){ });</script></div></span><span class="pull-right"></span></div><div id="post-info"><div id="post-title"><div class="posttitle">分库分表下分页查询解决方案</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2019-08-25<span class="post-meta__separator">|</span><i class="fa fa-history" aria-hidden="true"></i> 更新于 2019-08-25</time></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><h1 id="分库分表下分页查询解决方案"><a href="#分库分表下分页查询解决方案" class="headerlink" title="分库分表下分页查询解决方案"></a>分库分表下分页查询解决方案</h1><blockquote>
+<p>不管是随着业务量的增大、还是随着用户数量的增长，在单一表中无法承受大量大数据，导致查询速度极慢甚至拖垮数据库。所以分库分表的策略随之应用，但是如何在分库分表的情况下，进行分页查询，目前仍是业界难题。<br>本文记录了三种情况下，对于分库分表下的分页查询优化方案。</p>
+</blockquote>
+<hr>
+<h2 id="1-目前大多数的解决方案"><a href="#1-目前大多数的解决方案" class="headerlink" title="1 目前大多数的解决方案"></a>1 目前大多数的解决方案</h2><p>不管是目前的一些数据库中间件例如Mycat，还是ElasticSearch下的分片查询，大多都使用了最简单的策略去实现不同存储下的全局有序查询，即在每次分页查询时，查询所有存储下相应的条数，汇总排序得到最终要展示的分页下的数量。<br>这种策略实现方案简单、精度高，但是随着查询页数的增长，不管是内存的占用还是查询速度都会极具上升。<strong>因此，如果要采取这种方案，要考虑到对于查询页数的限制，防止影响应用的运行。</strong></p>
+<h2 id="2-APP上的下拉式分页"><a href="#2-APP上的下拉式分页" class="headerlink" title="2 APP上的下拉式分页"></a>2 APP上的下拉式分页</h2><p>在APP上的分页查询，多数是采用了下拉式分页（向下拖动，会出现新的一页）。在这种情况下，用户无法自由的选取要查询的页数，因此可以采用以下方式来优化分页的性能。</p>
+<p>举个简单的例子，查询需要涉及到五个ES的索引，每页分页数量是10。</p>
+<ol>
+<li>当用户请求第一页数据时，从五个索引中分别查询前十条。</li>
+<li>分别记录五个索引中的数据截止位置，例如</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>索引1</th>
+<th>索引2</th>
+<th>索引3</th>
+<th>索引4</th>
+<th>索引5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3</td>
+<td>2</td>
+<td>0</td>
+<td>4</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<ol start="3">
+<li><p>用户请求下一页数据时，先查询上一页的用户分页缓存，从缓存中获取到上一页的截止位置，3、2、0、4、1。从对应索引的截止位置当起始位置，分页查询十条，记录当前截止位置，更新缓存。</p>
+</li>
+<li><p>用户请求的页数为第一页时，清除缓存，重复1-4步骤。</p>
+</li>
+</ol>
+<p>该策略不会出现当页数过多时，应用负载过高的情况，<strong>但是前提条件为用户不能跨页查询。</strong></p>
+<p><strong>注意点：</strong>再补充两点，使用该策略时，有两个需要注意的地方，</p>
+<ul>
+<li>我具体写代码的时候，截止位置的索引是放到redis中的，并且设置了超时时间十分钟。这样会导致一个问题，假如用户下拉到第三页，然后过了十分钟继续下拉，会出现缓存失效，查询结果自然会出错。这个问题想不出好的解决方法，最后只能是加大了缓存失效时间。</li>
+<li>用户下拉过快，会导致请求第N页和第N+1页的请求是同时发出的，但截止位置的缓存是一样的，自然返回的结果是一样的。解决方案：客户端要做限制，不能同时请求多页数据，后端设置缓存时，把page的信息设置到key中，收到请求page=N的请求时，去获取N-1的缓存，如果缓存没有，阻塞一秒，等待前一页的缓存生效，再继续操作。</li>
+</ul>
+<h2 id="3-普通的分页查询"><a href="#3-普通的分页查询" class="headerlink" title="3 普通的分页查询"></a>3 普通的分页查询</h2><p>在一些后台管理页面中，分页查询是要能支持跨页查询的，这样就无法使用上一种的策略了，但是还可以想办法做出一些优化。</p>
+<h3 id="3-1-查询精度要求很低"><a href="#3-1-查询精度要求很低" class="headerlink" title="3.1 查询精度要求很低"></a>3.1 查询精度要求很低</h3><p>如果对查询精度没有要求的话，可以使用一种简单的策略，还是拿上面的例子还说明：<br>查询需要涉及到五个ES的索引，每页分页数量是10。<br>那么第一页查询分别查询五个索引的0-10条数据再排序返回前十条。<br>第二页查询分别查询五个索引的10-20条数据再排序返回前十条。<br>…<br>简单、性能高，但是问题也是显而易见的，<strong>查询的精度很低，可能会漏掉许多数据，但是每页数据无重复。</strong></p>
+<h3 id="3-2-查询精度一般-二次查询"><a href="#3-2-查询精度一般-二次查询" class="headerlink" title="3.2 查询精度一般-二次查询"></a>3.2 查询精度一般-二次查询</h3><p>网上广为流传的二次查询策略，该策略的数据精度比上一种方案有了明显的提高。具体内容如下<br>条件：查询需要涉及到五个ES的索引，每页分页数量是10。</p>
+<ol>
+<li>求得每个索引的查询条数actualPageSize，用每页查询的数量 整除 索引数量。<br>即actualPageSize = pageSize / indexSize</li>
+<li>查询每个索引下相应页数的actualPageSize条，<br>即 limit page * actualPageSize,actualPageSize</li>
+<li>汇总所有索引的查询，排序得到最小的记录的标识符minId（如果主键是自增就是id，主键不是自增就是创建时间cmt_created)，并记录每个索引各自的最大的记录的标识符maxId。注意，minId只有一个，maxId每个索引都有自己的一个。</li>
+<li>在每个索引中，使用between minId,maxId 查询相应的结果后汇总排序，得到前十条记录返回。</li>
+</ol>
+<p><strong>该种策略查询数据的精度比较高（在数据为随机分配的情况下，精度可为百分百），且不会出现数据丢失，但在数据分布不均的情况会出现数据重复，即上一页的数据在下一页中还能看到。</strong></p>
+<p>PS：为了继续提高查询精度，我又做出了改进点，比如，当请求前十页的数据时，使用策略1，获取前N页的所有数据，内存排序。请求十页以后，使用策略3.2。考虑点为前十页的数据是用户经常要访问的，不应该出现数据的丢失和重复，十页以后的数据基本上不会有人看，数据精度不准页没关系。</p>
+<p>PS：阈值的设定，不能定的太草率，之前我设定的阈值是10，从第十页开始，使用不同的策略。也应该考虑一下具体每条数据的大小、内存排序时的总空间占用，用户的并发访问度等情况。目前阈值的设定为全局排序时的内存占用不能超过5M。</p>
+<h3 id="3-3-查询精度不允许损失-双写"><a href="#3-3-查询精度不允许损失-双写" class="headerlink" title="3.3 查询精度不允许损失-双写"></a>3.3 查询精度不允许损失-双写</h3><p>我也不知道什么样的业务场景下有该需求啊，但是之前我的部门主管使用过一种策略，可以保证精度不丢失。</p>
+<p>当当当当，就是双写</p>
+<p>什么含义呢？就是当新增或者删除你要查询的数据列表时，同时向一张新表中修改所对应的值。</p>
+<p>新表的主要表结构如下，主要作用是，记录了不同排序规则下，记录的排序情况。</p>
+<p>这样在查询时，根据不同的排序条件，查找不同的排序类型，就得到了一个全局排序记录的id列表，从中截取你要查询的页数量后，再根据id查询相应的记录列表。</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段名称</th>
+<th align="center">字段类型</th>
+<th align="center">字段描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Id</td>
+<td align="center">Int</td>
+<td align="center">主键</td>
+</tr>
+<tr>
+<td align="center">order_type</td>
+<td align="center">tinyint</td>
+<td align="center">排序类型</td>
+</tr>
+<tr>
+<td align="center">record_id_list</td>
+<td align="center">Text</td>
+<td align="center">有序记录id列表</td>
+</tr>
+</tbody></table>
+<p>限制条件呢有很多，第一，记录要符合读多写少的情况，不然双写的性能消耗太大。</p>
+<p>第二，排序类型不能过多，我之前的需求是只有一种排序类型的。</p>
+<p>第三，记录id列表中存储的记录不能过多，否则就得不偿失。</p>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">lvqiushi</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lvqiushi.github.io/2019/08/25/page-twice/">https://lvqiushi.github.io/2019/08/25/page-twice/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lvqiushi.github.io">Lv's Blogs</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/cover/page.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script></div></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2019/08/19/preface/"><img class="next_cover lozad" data-src="/cover/xuyan.png" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>开山之剑-第一篇博客</span></div></a></div></nav></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2019 By lvqiushi</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly"><span>Butterfly</span></a></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><section class="rightside" id="rightside"><i class="fa fa-book" id="readmode" title="阅读模式"> </i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换">简</a><i class="fa fa-moon-o nightshift" id="nightshift" title="夜间模式"></i></section><div id="post_bottom"><div id="post_bottom_items"><a id="to_comment" href="#post-comment"><i class="scroll_to_comment fa fa-comments"></i></a><i class="fa fa-list" id="mobile_toc"></i><div id="toc_mobile"><div class="toc_mobile_headline">目录</div><ol class="toc_mobile_items"><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#分库分表下分页查询解决方案"><span class="toc_mobile_items-number">1.</span> <span class="toc_mobile_items-text">分库分表下分页查询解决方案</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#1-目前大多数的解决方案"><span class="toc_mobile_items-number">1.1.</span> <span class="toc_mobile_items-text">1 目前大多数的解决方案</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#2-APP上的下拉式分页"><span class="toc_mobile_items-number">1.2.</span> <span class="toc_mobile_items-text">2 APP上的下拉式分页</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#3-普通的分页查询"><span class="toc_mobile_items-number">1.3.</span> <span class="toc_mobile_items-text">3 普通的分页查询</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#3-1-查询精度要求很低"><span class="toc_mobile_items-number">1.3.1.</span> <span class="toc_mobile_items-text">3.1 查询精度要求很低</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#3-2-查询精度一般-二次查询"><span class="toc_mobile_items-number">1.3.2.</span> <span class="toc_mobile_items-text">3.2 查询精度一般-二次查询</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#3-3-查询精度不允许损失-双写"><span class="toc_mobile_items-number">1.3.3.</span> <span class="toc_mobile_items-text">3.3 查询精度不允许损失-双写</span></a></li></ol></li></ol></li></ol></div></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/nightshift.js"></script><script id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zindex="-1" data-click="false"></script><script src="/js/tw_cn.js"></script><script>translateInitilization()
+
+</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@1.2.2/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script><script>const observer = lozad(); // lazy loads elements with default selector as '.lozad'
+observer.observe();</script></body></html>
