@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>zookeeper的灵魂-zab协议 | Lv's Blogs</title><meta name="description" content="zookeeper的灵魂-zab协议"><meta name="keywords" content><meta name="author" content="lvqiushi"><meta name="copyright" content="lvqiushi"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="canonical" href="https://lvqiushi.github.io/2019/11/02/zookeeper-1/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="zookeeper的灵魂-zab协议"><meta name="twitter:description" content="zookeeper的灵魂-zab协议"><meta name="twitter:image" content="https://lvqiushi.github.io/cover/xuyan.png"><meta property="og:type" content="article"><meta property="og:title" content="zookeeper的灵魂-zab协议"><meta property="og:url" content="https://lvqiushi.github.io/2019/11/02/zookeeper-1/"><meta property="og:site_name" content="Lv's Blogs"><meta property="og:description" content="zookeeper的灵魂-zab协议"><meta property="og:image" content="https://lvqiushi.github.io/cover/xuyan.png"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="next" title="分库分表下分页查询解决方案" href="https://lvqiushi.github.io/2019/08/25/page-twice/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://lvqiushi.github.io","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight_copy: 'true',
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: '添加书签',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天'
+
+  
+}</script></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#zookeeper的灵魂-zab协议"><span class="toc-number">1.</span> <span class="toc-text">zookeeper的灵魂-zab协议</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-zk-选举流程"><span class="toc-number">1.1.</span> <span class="toc-text">1 zk-选举流程</span></a></li></ol></li></ol></div></div></div><div id="content-outer"><div id="top-container" style="background-image: url(/img/post-bg.png)"><div id="page-header"><span class="pull-left"> <a class="blog_title" id="site-name" href="/">Lv's Blogs</a></span><div class="open toggle-menu pull-right"><div class="menu-icon-first"></div><div class="menu-icon-second"></div><div class="menu-icon-third"></div></div><span class="pull-right menus"><div class="mobile_author_icon"><img class="lozad" src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'"><div class="mobile_author-info__description">If you want,you can.</div></div><hr><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a><script>document.body.addEventListener('touchstart', function(){ });</script></div></span><span class="pull-right"></span></div><div id="post-info"><div id="post-title"><div class="posttitle">zookeeper的灵魂-zab协议</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2019-11-02<span class="post-meta__separator">|</span><i class="fa fa-history" aria-hidden="true"></i> 更新于 2019-11-02</time></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><h1 id="zookeeper的灵魂-zab协议"><a href="#zookeeper的灵魂-zab协议" class="headerlink" title="zookeeper的灵魂-zab协议"></a>zookeeper的灵魂-zab协议</h1><blockquote>
+<p>​        之前每次面试前，都要把zookeeper的相关知识再看一遍，这次直接把对zookeeper的一些理解记录下来，方便查阅。<br>​        由于zookeeper涉及到的东西比较多，所以分成两部分介绍，本次写的是zookeeper的核心-zab数据一致性协议。</p>
+</blockquote>
+<hr>
+<h2 id="1-zk-选举流程"><a href="#1-zk-选举流程" class="headerlink" title="1 zk-选举流程"></a>1 zk-选举流程</h2><p>zookeeper的zab协议主要包括两部分，一是leader的选举，二是数据的同步过程。</p>
+<p>在zookeeper中节点（在代码中称为Quorum）类型有三种</p>
+<ol>
+<li>leader 选举过程中得到集群中半数以上节点认同的节点。</li>
+<li>follwer follwer参与选举过程，其中follwer与observer在代码中都表示为Learner。</li>
+<li>observer observer是一种节点的启动类型，表示该节点不会参与选举。</li>
+<li>read-only  准确的讲并不是在选举中需要用到的，而是一种启动类型，如果以read-only模式启动，当zookeeper集群发生故障不可用，该节点依然能够提供读服务。</li>
+</ol>
+<p>zookeeper中的数据都保存在每个节点的内存中（也就是冗余储存，每个机器一份），每个操作会有TxnLog记录，并且会有定时的合并成snapshot文件，存储在磁盘上，保证数据不丢失。</p>
+<p>当zookeeper集群启动时，每台机器要先从磁盘中恢复数据到内存中。并获取到各自数据的最后一条事务操作id-lastProcessedZxid，lastProcessedZxid其实意味着每台机器的数据完整程度，lastProcessedZxid越大表示该台机器的数据最完整，zk的选举主要就是选择一台lastProcessedZxid最大的机器当做leader，这样在后续的节点数据同步时，工作量就会少很多。加载完数据以后，根据config中的集群列表，与每个节点建立通讯(默认是NIO，可以加参数配置选择netty)，并将io连接保存下来，由QuorumCnxManager类统一管理，之后就进入选举流程。</p>
+<p>选举代码中一些重要的数据结构的描述</p>
+<p><strong>节点选举过程中发送的消息结构</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ToSend</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">enum</span> mType &#123;crequest, challenge, notification, ack&#125; <span class="comment">// 选举发送的为notification</span></span><br><span class="line">    <span class="keyword">long</span> leader; <span class="comment">// 推举的leaderId (sid)</span></span><br><span class="line">    <span class="keyword">long</span> zxid;   <span class="comment">// 初始化为从磁盘恢复的lastProcessedZxid,前32位表示peerEpoch，后32位为leader的提议计数</span></span><br><span class="line">    <span class="keyword">long</span> electionEpoch;  <span class="comment">// 选举轮次，每次投票都会+1  与logicalclock概念一致</span></span><br><span class="line">    QuorumPeer.ServerState state;  <span class="comment">// 当前节点状态，初始化为LOOKING</span></span><br><span class="line">    <span class="keyword">long</span> sid;   <span class="comment">// 发送方的sid</span></span><br><span class="line">    <span class="keyword">long</span> peerEpoch;      <span class="comment">// leader当选的轮次,每一次选举成功后+1</span></span><br><span class="line">  	<span class="keyword">byte</span>[] configData = dummyData;  <span class="comment">// 集群的快照 对应QuorumVerifier类</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>选票的PK算法totalOrderPredicate逻辑：</strong></p>
+<p>​        先比较两个选票的peerEpoch，大者胜利</p>
+<p>​        再比较zxid的大小，大者胜利</p>
+<p>​        再比较sid的大小，大者胜利</p>
+<p><strong>确认选举完成的算法termPredicate逻辑：</strong></p>
+<p>​        每张选票所选举的sid，是否得到了集群中超过半数的票数。</p>
+<p><strong>zk选举过程流程图大致如下</strong></p>
+<p><img alt="zab" data-src="post_img/zk-flow-img.png" class="lozad"></p>
+<p><strong>选举结束以后的数据同步</strong></p>
+<p>前面提到过，选举最核心的是选一个zxid最大的当leadre，这样在结束以后，集群各个节点同步数据时，大多数都是发送DIFF，补充缺失的数据就好了，减少同步数据的处理时间和复杂性。</p>
+<p>当选举完成后，leader向learner节点发送确认通知，learner节点在返回ack前，会调用syncFollower方法与leader对比数据。</p>
+<p><strong>其中数据对比的可能出现情况如下：</strong></p>
+<ol>
+<li><p>leader.lastProcessedZxid == peerLastZxid   leader的数据和follwer的数据一致，发送DIFF类型数据包   </p>
+</li>
+<li><p>leader.maxCommittedLog &lt; peerLastZxid   follower的zxid &gt; leader的zxid，follower节点要把多余的数据删除掉,发送TRUNC类型数据包</p>
+</li>
+<li><p>leader.maxCommittedLog &gt;= peerLastZxid &amp;&amp; leader.minCommittedLog &lt;= peerLastZxid</p>
+<p>follower的数据略少于leader的数据，发送txnlog + committedLog包进行同步</p>
+</li>
+<li><p>leader.minCommittedLog &gt;  peerLastZxid   follower的数据远少于leader的数据，发送SNAP类型数据包，并直接发送snapshot文件让follower同步</p>
+</li>
+</ol>
+<p>当数据同步完成后，集群此刻才进入可用状态。</p>
+<p>##2 zab-如何保证数据一致性</p>
+<p><strong>zk可以保证请求的一致性为：每个session的请求按顺序执行、写请求按照zxid顺序执行、确认一个session中写请求之间没有竞争</strong></p>
+<p>当集群正常工作时，zab协议同时负责每个节点的数据同步工作。</p>
+<p>所以现在重点来写一下，当一个写请求提交时，zk集群的响应流程主要如下图所示。</p>
+<p><img alt="zk-write-process" data-src="post_img/zk-write-process.png" class="lozad"></p>
+<ol>
+<li><p>PrepRequestProcessor</p>
+<p>所有请求类型第一层要经过的处理链。</p>
+<p>主要职责是对request请求进行初始化，如果是事务请求则设置相应的请求体，并将写操作记录到outstandingChanges与outstandingChangesForPath队列中（对这两个队列的操作都会使用outstandingChanges加对象锁，保证并发安全）。非事务请求只检查session是否有效。(Watche的操作也都属于非事务请求)</p>
+</li>
+<li><p>ProposalRequestProcessor</p>
+<p>ProposalRequestProcessor的下一条链是CommitProcessor，在初始化时，会先启动SyncRequestProcessor。该请求链的主要职责是，收到请求后，调用Leader的propose方法，构造提议消息体，并将该提议发送给集群内的其他节点。</p>
+<p>向CommitProcessor的queuedRequests队列入队请求。</p>
+<p>之后，再向SyncRequestProcessor的queuedRequests队列中入队本次的请求。</p>
+</li>
+<li><p>SyncRequestProcessor</p>
+<p>SyncRequestProcessor的主要职责是确保ProposalRequestProcessor传递的请求能够保存到本地磁盘上，在SyncRequestProcessor中有线程不断的轮询queuedRequests队列，接收到Request，就将Request写到事务日志文件中。如果写入失败，则请求失败。</p>
+</li>
+<li><p>AckRequestProcessor</p>
+<p>在Leader节点处理过程中，SyncRequestProcessor会调用AckRequestProcessor，向自己发送ACK确认信息。</p>
+</li>
+<li><p>CommitProcessor</p>
+<p>CommitProcessor的主要职责是检查事务请求是否能够被提交。(如果是非事务类型请求，就直接放行了，进入下一条请求链处理)</p>
+<p>CommitProcessor是最复杂的一个请求链，同时和ProposalRequestProcessor、SyncRequestProcessor有交互（还都是用队列，异步进行的，所以理解起来非常难= =）。</p>
+<p>先看一下内部重要的数据结构</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 所有请求通过processPacket方法首先放入该队列，等待后续处理</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">final</span> LinkedBlockingQueue&lt;Request&gt; queuedRequests =</span><br><span class="line">    <span class="keyword">new</span> LinkedBlockingQueue&lt;Request&gt;();</span><br><span class="line"><span class="comment">// 被集群半数节点通过的请求，会到这个队列里面</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">final</span> LinkedBlockingQueue&lt;Request&gt; committedRequests =</span><br><span class="line">    <span class="keyword">new</span> LinkedBlockingQueue&lt;Request&gt;();</span><br><span class="line"><span class="comment">// 下一个等待提交的请求</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">final</span> AtomicReference&lt;Request&gt; nextPending =</span><br><span class="line">        <span class="keyword">new</span> AtomicReference&lt;Request&gt;();</span><br><span class="line"><span class="comment">// 当前正在执行的请求</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> AtomicReference&lt;Request&gt; currentlyCommitting =</span><br><span class="line">        <span class="keyword">new</span> AtomicReference&lt;Request&gt;();</span><br></pre></td></tr></table></figure>
+
+<p>该请求链的主循环不断判断有没有待提交的请求，如果有，调用WorkerService提交请求执行到下一请求链。WorkerService用于保证同一session的请求能够被顺序发送。</p>
+<p>Follower在接收到leader的提议时，会先保存zxid，等再接收到commit请求后会调用commit方法进行处理提交的写请求，先对比pendingTxns的zxid和commit的zxid，如果不一致则follwer直接退出，重新同步leader数据。</p>
+</li>
+<li><p>ToBeAppliedRequestProcessor</p>
+<p>CommitProcessor的下一条链，该链的下一条链为FinalRequestProcessor。</p>
+<p>该请求链中有个待应用队列toBeApplied</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">private final ConcurrentLinkedQueue&lt;Proposal&gt; toBeApplied = new ConcurrentLinkedQueue&lt;Proposal&gt;();</span><br></pre></td></tr></table></figure>
+
+<p>当Leader收到集群节点的大多数ACK时，会把请求放入到toBeApplied队列中。</p>
+<p>当本请求链被调用时，先直接调用FinalRequestProcessor，完成事务请求的落地，再从toBeApplied队列中删除相应的事务请求。</p>
+</li>
+<li><p>FinalRequestProcessor</p>
+<p>所有请求的最终处理链，主要职责是负责将事务请求落实到内存数据库中，也就是写库操作。写完库以后会把outstandingChanges相应的record删除掉，并向follower发送数据的comitted数据包。</p>
+</li>
+</ol>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">lvqiushi</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lvqiushi.github.io/2019/11/02/zookeeper-1/">https://lvqiushi.github.io/2019/11/02/zookeeper-1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lvqiushi.github.io">Lv's Blogs</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/cover/xuyan.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script></div></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2019/08/25/page-twice/"><img class="next_cover lozad" data-src="/cover/page.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>分库分表下分页查询解决方案</span></div></a></div></nav></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2019 By lvqiushi</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly"><span>Butterfly</span></a></div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><section class="rightside" id="rightside"><i class="fa fa-book" id="readmode" title="阅读模式"> </i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换">简</a><i class="fa fa-moon-o nightshift" id="nightshift" title="夜间模式"></i></section><div id="post_bottom"><div id="post_bottom_items"><a id="to_comment" href="#post-comment"><i class="scroll_to_comment fa fa-comments"></i></a><i class="fa fa-list" id="mobile_toc"></i><div id="toc_mobile"><div class="toc_mobile_headline">目录</div><ol class="toc_mobile_items"><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#zookeeper的灵魂-zab协议"><span class="toc_mobile_items-number">1.</span> <span class="toc_mobile_items-text">zookeeper的灵魂-zab协议</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#1-zk-选举流程"><span class="toc_mobile_items-number">1.1.</span> <span class="toc_mobile_items-text">1 zk-选举流程</span></a></li></ol></li></ol></div></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/nightshift.js"></script><script id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zindex="-1" data-click="false"></script><script src="/js/tw_cn.js"></script><script>translateInitilization()
+
+</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@1.2.2/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script><script>const observer = lozad(); // lazy loads elements with default selector as '.lozad'
+observer.observe();</script></body></html>
