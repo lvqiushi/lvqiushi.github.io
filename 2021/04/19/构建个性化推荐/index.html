@@ -1,0 +1,188 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>构建个性化推荐 | Lv's Blogs</title><meta name="keywords" content="个性化推荐"><meta name="author" content="lvqiushi"><meta name="copyright" content="lvqiushi"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="构建个性化推荐     最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）      目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念，和部分简单的算法模型    1 目前主流推荐流程概述 开局一张图，剩下全靠编~ 这个流程基本上就是现在的主流流程了，接下来我来讲述一下分成4层的目的  召回：召回">
+<meta property="og:type" content="article">
+<meta property="og:title" content="构建个性化推荐">
+<meta property="og:url" content="https://lvqiushi.github.io/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/index.html">
+<meta property="og:site_name" content="Lv&#39;s Blogs">
+<meta property="og:description" content="构建个性化推荐     最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）      目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念，和部分简单的算法模型    1 目前主流推荐流程概述 开局一张图，剩下全靠编~ 这个流程基本上就是现在的主流流程了，接下来我来讲述一下分成4层的目的  召回：召回">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png">
+<meta property="article:published_time" content="2021-04-19T12:00:00.000Z">
+<meta property="article:modified_time" content="2021-04-20T11:09:58.379Z">
+<meta property="article:author" content="lvqiushi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="canonical" href="https://lvqiushi.github.io/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-04-20 19:09:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">13</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Lv's Blogs</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">构建个性化推荐</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-04-19T12:00:00.000Z" title="发表于 2021-04-19 20:00:00">2021-04-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-04-20T11:09:58.379Z" title="更新于 2021-04-20 19:09:58">2021-04-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/">个性化推荐</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="构建个性化推荐"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="构建个性化推荐"><a href="#构建个性化推荐" class="headerlink" title="构建个性化推荐"></a>构建个性化推荐</h1><blockquote>
+<pre><code>    最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）
+
+    目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念，和部分简单的算法模型
+</code></pre>
+</blockquote>
+<hr>
+<h2 id="1-目前主流推荐流程概述"><a href="#1-目前主流推荐流程概述" class="headerlink" title="1 目前主流推荐流程概述"></a>1 目前主流推荐流程概述</h2><p><img src= "/img/loading.gif" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-flow.png" alt="recommend-flow"></p>
+<p>开局一张图，剩下全靠编~</p>
+<p>这个流程基本上就是现在的主流流程了，接下来我来讲述一下分成4层的目的</p>
+<ol>
+<li><p>召回：召回层的出现是为了解决目前排序层的模型无法处理超大数据的问题，如果有一天排序层能够快速排序整个资源池的数据，那召回层也就没有存在的必要了。</p>
+<p>所以召回层的目的，就是先筛选出资源池的部分数据（几千或者几百），让接下来的排序层模型能够实时处理数据。目前大部分系统使用的依然以多路召回为主，当然实力强劲的企业也会使用模型去进行召回。</p>
+</li>
+<li><p>粗排：可以忽略，跟召回的目的差不多，也是为了进一步减小排序的工作量，比方说可以在粗排阶段，过滤掉用户最近看到过的作品，来减少输出量。（我也不知道为啥叫粗排不叫再召回。。。）</p>
+</li>
+<li><p>精排：可谓是推荐系统的重中之重，关于推荐排序的论文数不胜数，可见其重要性。排序的目的，就是根据当前用户的行为、标签等属性，来给收到的数据集进行排序（可以理解为用户对作品的感兴趣的程度）。排好序以后，返回topK，自然就是用户最可能感兴趣的作品了。</p>
+</li>
+<li><p>重排：重排的输入是精排返回的topK，重排的目的主要是出于业务需求，比方说，业务方需要额外在推荐列表插入广告等指定的配置等。最后输出的就是用户实际看到的推荐列表了。</p>
+</li>
+</ol>
+<p>之所以分成4层，主要是为了解决推荐的准确度和处理速度的冲突，通过召回的预处理减小排序的工作量，使得推荐的准确度和速度能得到均衡。</p>
+<p>承接上文<a href="https://lvqiushi.github.io/2021/02/23/recommnd/">《推荐系统的设计》</a>，我之前设计的推荐平台，其实也都包含了这些概念（麻雀虽小，五脏俱全），反过来也证明了，这个流程的设计还是有一定工程依据的。下面这张图，我用颜色区分与标准流程进行了对应。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-system-map.png" alt="system-map"></p>
+<h2 id="2-召回"><a href="#2-召回" class="headerlink" title="2 召回"></a>2 召回</h2><p>概述中有提到，召回的主要作用是为了降低排序的工作量，减小处理数据集的大小。</p>
+<p>用容易理解的话来说，就是根据**<em>用户的属性来给数据集进行采样。**</em>只要能达到这个目的，都能称之为召回。</p>
+<p>早期的召回主要以CB为主（content base–基于内容的召回），说白了就是标签匹配，比方说在ES（搜索引擎）中根据用户的喜爱标签搜索作品，由于ES本身是倒排索引，所以搜索速度很快，实现也简单，就是一条DSL。</p>
+<p>至于像其他的协同过滤之类的，Emmmmm，可能有公司用到吧，主要是因为实现难度大，而且在召回阶段也不需要太高的准确度，所以不太常用。</p>
+<p>当然随着人工智能和底层硬件的飞速发展，目前也有很多公司采用了机器学习模型和深度学习模型来进行召回，因为CB召回主要严重依赖于人工（靠行业专家的经验定义标签规则），成本很高。</p>
+<p>由于本人并不是算法专家，所以这里就不做召回算法的介绍了，有兴趣可以搜索一下，相关的知识很多，这里只推荐一个入门级的机器学习模型FM，算是比较成熟的算法了。</p>
+<p>也有继续硬刚CB的，为了解决CB的痛点（依赖经验），所以采用了多路召回来降低风险，这也是我目前使用的方案，所以举个例子</p>
+<ol>
+<li>用户标签策略匹配200条</li>
+<li>热门排行榜拿前100条</li>
+<li>新品榜拿前100条</li>
+<li>人工配置库（精品榜）拿前100条</li>
+<li>….等等</li>
+</ol>
+<p>将不同的策略召回的数据累加直接输出到排序层，来降低单一策略定义不好时带来的风险。</p>
+<p>当然，如果实力足够，可以在多路召回的单个策略使用学习模型去跑。</p>
+<h2 id="3-排序"><a href="#3-排序" class="headerlink" title="3 排序"></a>3 排序</h2><p>排序阶段，整个推荐系统的精华，直接影响了推荐系统的质量，所以一般来说都是这一阶段开始使用模型去跑，所以才需要前面的召回层减小处理量。</p>
+<p>目前，排序最主流的方式都是CTR预估（间接或者直接使用）</p>
+<p>在早期阶段，是使用的LR（线性回归）去进行CTR，因为点击事件比较符合线性回归算法的语义，并且处理速度快，算法解释性高。但是，实际场景中，用户特征与商品之间大多都是非线性关系，所以需要额外的进行大量的特征工程来改善算法质量，严重依赖于经验判断。</p>
+<p>所以Facebook首先提出了GBRT + LR，用模型来训练特征工程，来降低人工成本和减小经验依赖。</p>
+<p>GBRT（梯度提升树）用于训练特征树模型，由于特征树模型的枝干基本上就是特征的组合，所以就可以使用GBRT进行特征组合，并将特征输入到LR中进行CTR。</p>
+<p>但是随着特征的离散值不断扩大，并且GBRT具有记忆性的问题（只能学习到训练数据中出现过的组合），随后提出了FM（因子分解机）+ LR用于进行CTR。</p>
+<p>当然以上都是机器学习的范畴，近年来模型的发展早已进入了深度学习，不过本人毕竟不是算法工程师，对于深度学习认知有限，所以就不在详细介绍了。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">lvqiushi</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lvqiushi.github.io/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/">https://lvqiushi.github.io/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lvqiushi.github.io" target="_blank">Lv's Blogs</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/03/29/elastic%20search/"><img class="next-cover" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/es_log.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Elastic Search 存储方式</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">lvqiushi</div><div class="author-info__description">If you want,you can.</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">13</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/lvqiushi"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/lvqiushi" target="_blank" title=""><i class="fa fa-github"></i></a><a class="social-icon" href="mailto:578915614@qq.com" target="_blank" title=""><i class="fa fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/lvqinglou" target="_blank" title=""><i class="fa fa-rss"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">感谢访问本网站，若喜欢请收藏^_^，如要查看更多文章请点击上方按钮前往csdn浏览</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90"><span class="toc-number">1.</span> <span class="toc-text">构建个性化推荐</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%9B%AE%E5%89%8D%E4%B8%BB%E6%B5%81%E6%8E%A8%E8%8D%90%E6%B5%81%E7%A8%8B%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">1 目前主流推荐流程概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%8F%AC%E5%9B%9E"><span class="toc-number">1.2.</span> <span class="toc-text">2 召回</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%8E%92%E5%BA%8F"><span class="toc-number">1.3.</span> <span class="toc-text">3 排序</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/" title="构建个性化推荐"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="构建个性化推荐"/></a><div class="content"><a class="title" href="/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/" title="构建个性化推荐">构建个性化推荐</a><time datetime="2021-04-19T12:00:00.000Z" title="发表于 2021-04-19 20:00:00">2021-04-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/29/elastic%20search/" title="Elastic Search 存储方式"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/es_log.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Search 存储方式"/></a><div class="content"><a class="title" href="/2021/03/29/elastic%20search/" title="Elastic Search 存储方式">Elastic Search 存储方式</a><time datetime="2021-03-29T05:00:00.000Z" title="发表于 2021-03-29 13:00:00">2021-03-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/23/recommnd/" title="构建个性化推荐--工程方向"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="构建个性化推荐--工程方向"/></a><div class="content"><a class="title" href="/2021/02/23/recommnd/" title="构建个性化推荐--工程方向">构建个性化推荐--工程方向</a><time datetime="2021-02-23T11:27:00.000Z" title="发表于 2021-02-23 19:27:00">2021-02-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/12/11/log-fetch/" title="日志平台构建--日志抓取"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/log-img.png/blog_cover" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="日志平台构建--日志抓取"/></a><div class="content"><a class="title" href="/2020/12/11/log-fetch/" title="日志平台构建--日志抓取">日志平台构建--日志抓取</a><time datetime="2020-12-11T10:00:00.000Z" title="发表于 2020-12-11 18:00:00">2020-12-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/10/04/canal/" title="canal部署以及使用"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/canallog.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="canal部署以及使用"/></a><div class="content"><a class="title" href="/2020/10/04/canal/" title="canal部署以及使用">canal部署以及使用</a><time datetime="2020-10-04T09:00:00.000Z" title="发表于 2020-10-04 17:00:00">2020-10-04</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png')"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2021 By lvqiushi</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
