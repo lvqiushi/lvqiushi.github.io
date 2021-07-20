@@ -7,7 +7,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/Spring-log.png">
 <meta property="article:published_time" content="2020-05-06T15:20:00.000Z">
-<meta property="article:modified_time" content="2021-04-20T07:27:55.542Z">
+<meta property="article:modified_time" content="2021-07-07T11:15:52.492Z">
 <meta property="article:author" content="lvqiushi">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/Spring-log.png"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="canonical" href="https://lvqiushi.github.io/2020/05/06/spring-ioc/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
@@ -56,7 +56,7 @@
   isHome: false,
   isHighlightShrink: false,
   isToc: true,
-  postUpdate: '2021-04-20 15:27:55'
+  postUpdate: '2021-07-07 19:15:52'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -169,7 +169,7 @@
 <p>到这里已经看了三段Spring的源代码，不难发现，其方法命名真的很好，并且对于含有复杂操作的方法也都有注释进行描述，很值得我们去学习。</p>
 <p>只看方法名就能得到我们要具体关注的内容了，也就是loadBeanDefinitions(beanFactory)这个方法，加载对象描叙，也就是上文提到了，要创建对象，肯定要去获取原材料，在Spring中，BeanDefinition就是生产对象的原材料，所有的对象会先组装为BeanDefinition，储存到beanFactory中，最后在真正的实例化对象是，变成真正的Spring bean。</p>
 <p>至于loadBeanDefinitions的具体细节这里就不展开讲了，要详细讲的话不只是我不想写，更有可能的是你不想看。。因为太多了，包含了很多类扫描机制、xml解析的细节，这里只要清楚，经过该步骤，应该被Spring所管理的对象就转变为了BeanDefinition，并存放到了BeanFactory下的beanDefinitionMap中。</p>
-<p><strong><em>注册bean扩展机制之一：</em></strong>一开始也讲过了，在生成BD中，Spring页提供了额外的扩展机制ImportBeanDefinitionRegistrar，实现该接口的registerBeanDefinitions方法，就可以向Spring容器中放入我们自己的对象。</p>
+<p><strong><em>注册bean扩展机制之一：</em></strong>一开始也讲过了，在生成BD中，Spring也提供了额外的扩展机制ImportBeanDefinitionRegistrar，实现该接口的registerBeanDefinitions方法，就可以向Spring容器中放入我们自己的对象。</p>
 <p>具体的实现机制为Spring中有一个ConfigurationClassPostProcessor的BeanFactoryPostProcessor，在BeanFactory创建的时候会进行回调，这时候，会去扫描当前所有BeanDefinition对象，并去处理@Configuration注解（像@Import、@ImportResource、@Bean都是这时候处理的）。</p>
 <p>@Configuration注解描述的类本身会被注册到容器，@Bean描述的方法会被注册到容器，@ImportResource描述的配置文件会被加载会解析出BeanDefinition注册到Spring中</p>
 <p>@Import导入的普通类会当做ConfigClass处理，@Import导入的ImportSelector类会执行ImportSelector#selectImports()方法，方法返回的类也作为导入进行处理@Import的逻辑，@Import导入的ImportBeanDefinitionRegistrar类，会调用它的registerBeanDefinitions()方法，由它来自定义注册BeanDefinition的逻辑。</p>

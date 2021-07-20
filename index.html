@@ -54,7 +54,7 @@
   isHome: true,
   isHighlightShrink: false,
   isToc: false,
-  postUpdate: '2021-07-06 11:24:11'
+  postUpdate: '2021-07-20 10:12:59'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -142,8 +142,7 @@
 
 1 停机维护不是办法的办法，但是风险基本上是最小的，并且实现起来也很容易。
 对于某些使用程度不高的业务来讲，在访问低谷期进行停机数据迁移是综合成本最小的方案。
-##2 基于强可靠的Kafka实现跨库迁移
-惯用流程，上来一张图
+2 基于强可靠的Kafka实现跨库迁移惯用流程，上来一张图
 
 整体方案分为以下六个阶段
 
@@ -156,7 +155,7 @@
 
 增量数据回放
 由于上一步迁移的是快照数据，所以要把这一段时间内的增量数据给补齐。
-补齐的方式很简单，之前的增量binlog已经都记录到Kafka中了，所以只需要放开消费者的限制，开始 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/" title="构建个性化推荐">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="构建个性化推荐"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/" title="构建个性化推荐">构建个性化推荐</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-04-19T12:00:00.000Z" title="发表于 2021-04-19 20:00:00">2021-04-19</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/">个性化推荐</a></span></div><div class="content">构建个性化推荐
+补齐的方式很简单，之前的增量binlog已经都记录到Kafka中了，所以只需要放开消费者的限制，开始消费K ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/" title="构建个性化推荐">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="构建个性化推荐"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/" title="构建个性化推荐">构建个性化推荐</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-04-19T12:00:00.000Z" title="发表于 2021-04-19 20:00:00">2021-04-19</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/">个性化推荐</a></span></div><div class="content">构建个性化推荐
     最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）
 
     目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念，和部分简单的算法模型
