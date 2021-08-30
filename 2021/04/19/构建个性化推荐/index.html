@@ -1,13 +1,13 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>构建个性化推荐 | Lv's Blogs</title><meta name="keywords" content="个性化推荐"><meta name="author" content="lvqiushi"><meta name="copyright" content="lvqiushi"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="构建个性化推荐     最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）      目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念，和部分简单的算法模型    1 目前主流推荐流程概述 开局一张图，剩下全靠编~ 这个流程基本上就是现在的主流流程了，接下来我来讲述一下分成4层的目的  召回：召回">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>构建个性化推荐 | Lv's Blogs</title><meta name="keywords" content="个性化推荐"><meta name="author" content="lvqiushi"><meta name="copyright" content="lvqiushi"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="构建个性化推荐     ​        最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）  目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念和部分简单的算法模型    1 目前主流推荐流程概述 开局一张图，剩下全靠编~ 这个流程基本上就是现在的主流流程了，接下来我来讲述一下分成4层的目的  召">
 <meta property="og:type" content="article">
 <meta property="og:title" content="构建个性化推荐">
 <meta property="og:url" content="https://lvqiushi.github.io/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/index.html">
 <meta property="og:site_name" content="Lv&#39;s Blogs">
-<meta property="og:description" content="构建个性化推荐     最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）      目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念，和部分简单的算法模型    1 目前主流推荐流程概述 开局一张图，剩下全靠编~ 这个流程基本上就是现在的主流流程了，接下来我来讲述一下分成4层的目的  召回：召回">
+<meta property="og:description" content="构建个性化推荐     ​        最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）  目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念和部分简单的算法模型    1 目前主流推荐流程概述 开局一张图，剩下全靠编~ 这个流程基本上就是现在的主流流程了，接下来我来讲述一下分成4层的目的  召">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png">
 <meta property="article:published_time" content="2021-04-19T12:00:00.000Z">
-<meta property="article:modified_time" content="2021-04-20T11:09:58.379Z">
+<meta property="article:modified_time" content="2021-08-30T02:53:22.146Z">
 <meta property="article:author" content="lvqiushi">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="canonical" href="https://lvqiushi.github.io/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
@@ -56,7 +56,7 @@
   isHome: false,
   isHighlightShrink: false,
   isToc: true,
-  postUpdate: '2021-04-20 19:09:58'
+  postUpdate: '2021-08-30 10:53:22'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -139,9 +139,7 @@
         }
       }
     })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Lv's Blogs</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">构建个性化推荐</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2021-04-19T12:00:00.000Z" title="undefined 2021-04-19 20:00:00">2021-04-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/">个性化推荐</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="构建个性化推荐"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="构建个性化推荐"><a href="#构建个性化推荐" class="headerlink" title="构建个性化推荐"></a>构建个性化推荐</h1><blockquote>
-<pre><code>    最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）
-
-    目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念，和部分简单的算法模型
+<pre><code>    ​        最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）  目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念和部分简单的算法模型
 </code></pre>
 </blockquote>
 <hr>
@@ -163,7 +161,7 @@
 <p>承接上文<a href="https://lvqiushi.github.io/2021/02/23/recommnd/">《推荐系统的设计》</a>，我之前设计的推荐平台，其实也都包含了这些概念（麻雀虽小，五脏俱全），反过来也证明了，这个流程的设计还是有一定工程依据的。下面这张图，我用颜色区分与标准流程进行了对应。</p>
 <p><img src= "/img/loading.gif" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-system-map.png" alt="system-map"></p>
 <h2 id="2-召回"><a href="#2-召回" class="headerlink" title="2 召回"></a>2 召回</h2><p>概述中有提到，召回的主要作用是为了降低排序的工作量，减小处理数据集的大小。</p>
-<p>用容易理解的话来说，就是根据**<em>用户的属性来给数据集进行采样。**</em>只要能达到这个目的，都能称之为召回。</p>
+<p>用容易理解的话来说，就是根据   <strong>用户的属性来给数据集进行采样。</strong> 只要能达到这个目的，都能称之为召回。</p>
 <p>早期的召回主要以CB为主（content base–基于内容的召回），说白了就是标签匹配，比方说在ES（搜索引擎）中根据用户的喜爱标签搜索作品，由于ES本身是倒排索引，所以搜索速度很快，实现也简单，就是一条DSL。</p>
 <p>至于像其他的协同过滤之类的，Emmmmm，可能有公司用到吧，主要是因为实现难度大，而且在召回阶段也不需要太高的准确度，所以不太常用。</p>
 <p>当然随着人工智能和底层硬件的飞速发展，目前也有很多公司采用了机器学习模型和深度学习模型来进行召回，因为CB召回主要严重依赖于人工（靠行业专家的经验定义标签规则），成本很高。</p>

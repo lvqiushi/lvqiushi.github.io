@@ -54,7 +54,7 @@
   isHome: true,
   isHighlightShrink: false,
   isToc: false,
-  postUpdate: '2021-08-12 12:04:25'
+  postUpdate: '2021-08-30 11:12:48'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -175,9 +175,7 @@ G1中的Collection Set
 增量数据回放
 由于上一步迁移的是快照数据，所以要把这一段时间内的增量数据给补齐。
 补齐的方式很简单，之前的增量binlog已经都记录到Kafka中了，所以只需要放开消费者的限制，开始消费K ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/" title="构建个性化推荐">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend-cover.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="构建个性化推荐"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/04/19/%E6%9E%84%E5%BB%BA%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/" title="构建个性化推荐">构建个性化推荐</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-04-19T12:00:00.000Z" title="发表于 2021-04-19 20:00:00">2021-04-19</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/">个性化推荐</a></span></div><div class="content">构建个性化推荐
-    最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）
-
-    目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念，和部分简单的算法模型
+    ​        最近在疯狂学习推荐相关知识，才发现之前对于推荐的认识有多么的简陋o(╥﹏╥)o （也同时说明了我现在进步很大，哈哈）  目前为止，感觉对推荐的了解总算是入了门，所以再写一篇文章总结一下推荐的基本流程及概念和部分简单的算法模型
 
 
 
@@ -190,8 +188,8 @@ G1中的Collection Set
 
 粗排：可以忽略，跟召回的目的差不多，也是为了进一步减小排序的工作量，比方说可以在粗排阶段，过滤掉用户最近看到过的作品，来减少输出量。（我也不知道为啥叫粗排不叫再召回。。。）
 
-精排：可谓是推荐系统的重中之重，关于推荐排序的论文数不胜数，可见其重要性。排序的目的，就是根据当前用 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2021/03/29/elastic%20search/" title="Elastic Search 存储方式">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/es_log.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Search 存储方式"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/03/29/elastic%20search/" title="Elastic Search 存储方式">Elastic Search 存储方式</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-03-29T05:00:00.000Z" title="发表于 2021-03-29 13:00:00">2021-03-29</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统</a></span></div><div class="content">Elastic Search 存储方式
-    个人习惯，一般学习数据库，主要学习其数据存储方式和索引结构。理解了这些，碰到很多优化方面的问题会事半功倍。
+精排：可谓是推荐系统的重中之重，关于推荐排序的论文数不胜数，可见其重要性。排序的目的，就是根 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2021/03/29/elastic%20search/" title="Elastic Search 存储方式">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/es_log.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Elastic Search 存储方式"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/03/29/elastic%20search/" title="Elastic Search 存储方式">Elastic Search 存储方式</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-03-29T05:00:00.000Z" title="发表于 2021-03-29 13:00:00">2021-03-29</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统</a></span></div><div class="content">Elastic Search 存储方式
+    ​        个人习惯，一般学习数据库，主要学习其数据存储方式和索引结构。理解了这些，碰到很多优化方面的问题会事半功倍。
 
 
 
@@ -202,7 +200,7 @@ G1中的Collection Set
 再通过查询分区元信息，确认该主分区Shared1位于数据节点Node1
 随后将请求转发到该数据节点Node1
 
-具体写入：Node1收到转发的请求后，首先对写入请求进行校验和预处理（像动态mapping就是这一步操作的），然后将文档数据写入到主分片Shared1。但由于es对读性能做出了巨大优化，导致写性能相对变的很差，所以在具体的写入文档时，es ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2021/02/23/recommnd/" title="构建个性化推荐--工程方向">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="构建个性化推荐--工程方向"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/02/23/recommnd/" title="构建个性化推荐--工程方向">构建个性化推荐--工程方向</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-02-23T11:27:00.000Z" title="发表于 2021-02-23 19:27:00">2021-02-23</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/">个性化推荐</a></span></div><div class="content">构建个性化推荐–工程方向
+具体写入：Node1收到转发的请求后，首先对写入请求进行校验和预处理（像动态mapping就是这一步操作的），然后将文档数据写入到主分片Shared1。但由于es对读性能做出了巨大优化，导致写性能相对变的很差，所以在具体 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2021/02/23/recommnd/" title="构建个性化推荐--工程方向">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/recommend1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="构建个性化推荐--工程方向"></a></div><div class="recent-post-info"><a class="article-title" href="/2021/02/23/recommnd/" title="构建个性化推荐--工程方向">构建个性化推荐--工程方向</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-02-23T11:27:00.000Z" title="发表于 2021-02-23 19:27:00">2021-02-23</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E4%B8%AA%E6%80%A7%E5%8C%96%E6%8E%A8%E8%8D%90/">个性化推荐</a></span></div><div class="content">构建个性化推荐–工程方向
     本篇文章主要面向推荐系统工程方向的介绍，而非算法相关的知识。
 
 
@@ -219,7 +217,7 @@ G1中的Collection Set
 加入用户标签的推荐
  为了解决不选标签的这些人，那就要想办法从用户的行为中推测出用户的标签。
  因此我们要记录用户的行为事件，正好上一次APP改版的时候，相关事件的埋点已经记录下来了。
- 但是由于技术能力还不够，由行为推测标签还是靠分析师和PD设计具体的分类规则，进行计算用户标签的。并且，计算标签也是T+1，跑离线 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/12/11/log-fetch/" title="日志平台构建--日志抓取">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/log-img.png/blog_cover" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="日志平台构建--日志抓取"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/12/11/log-fetch/" title="日志平台构建--日志抓取">日志平台构建--日志抓取</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-12-11T10:00:00.000Z" title="发表于 2020-12-11 18:00:00">2020-12-11</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统</a></span></div><div class="content">日志平台构建
+ 但是由于技术能力还不够，由行为推测标签还是靠分析师和PD设计具体的分类规则，进行计算用户标签的。并且，计算标签也是T+1，跑离线 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/12/11/log-fetch/" title="日志平台构建--日志抓取">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/log_system_cover.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="日志平台构建--日志抓取"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/12/11/log-fetch/" title="日志平台构建--日志抓取">日志平台构建--日志抓取</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-12-11T10:00:00.000Z" title="发表于 2020-12-11 18:00:00">2020-12-11</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统</a></span></div><div class="content">日志平台构建
    对于初具规模的公司来讲，日志系统都是属于不可或缺的一部分，本文通过应用日志作为示例，讲解日志采集、日志加工、日志展示相关流程
 
 
