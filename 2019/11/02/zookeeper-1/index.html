@@ -7,7 +7,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/zk-log.png">
 <meta property="article:published_time" content="2019-11-02T08:30:00.000Z">
-<meta property="article:modified_time" content="2021-04-26T08:04:34.287Z">
+<meta property="article:modified_time" content="2021-12-22T16:34:16.797Z">
 <meta property="article:author" content="lvqiushi">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/zk-log.png"><link rel="shortcut icon" href="/img/icon.png"><link rel="canonical" href="https://lvqiushi.github.io/2019/11/02/zookeeper-1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
@@ -56,7 +56,7 @@
   isHome: false,
   isHighlightShrink: false,
   isToc: true,
-  postUpdate: '2021-04-26 16:04:34'
+  postUpdate: '2021-12-23 00:34:16'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -197,7 +197,7 @@
 <h2 id="2-zab-如何保证数据一致性"><a href="#2-zab-如何保证数据一致性" class="headerlink" title="2 zab-如何保证数据一致性"></a>2 zab-如何保证数据一致性</h2><p><strong>zk可以保证请求的一致性为：每个session的请求按顺序执行、写请求按照zxid顺序执行、确认一个session中写请求之间没有竞争</strong></p>
 <p>当集群正常工作时，zab协议同时负责每个节点的数据同步工作。</p>
 <p>所以现在重点来写一下，当一个写请求提交时，zk集群的响应流程主要如下图所示。</p>
-<p><img src= "/img/loading.gif" data-lazy-src="/post_img/zk-write-process.png" alt="zk-write-process"></p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/zk-write-process.png" alt="zk-write-process"></p>
 <ol>
 <li><p>PrepRequestProcessor</p>
 <p>所有请求类型第一层要经过的处理链。</p>
