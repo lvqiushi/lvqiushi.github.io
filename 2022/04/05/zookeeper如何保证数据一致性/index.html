@@ -1,0 +1,173 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>zookeeper如何保证数据一致性 | Lv's Blogs</title><meta name="keywords" content="zookeeper"><meta name="author" content="lvqiushi"><meta name="copyright" content="lvqiushi"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="zookeeper如何保证数据一致性 ​        虽说zk是比较老的框架了，但是其一致性的保证放在今天的中间件中依然是很强力的存在。其数据持久化的流程也是非常标准的流程，兼具了性能和一致性的取舍，非常值得我们学习。   1 zk数据同步简述重要知识点：首先ZK的数据分为两部分，磁盘数据和内存数据  磁盘数据：存储在物理介质上的数据（持久化数据），可能与内存数据不一致。 内存数据：zk在启动时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zookeeper如何保证数据一致性">
+<meta property="og:url" content="https://lvqiushi.github.io/2022/04/05/zookeeper%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/index.html">
+<meta property="og:site_name" content="Lv&#39;s Blogs">
+<meta property="og:description" content="zookeeper如何保证数据一致性 ​        虽说zk是比较老的框架了，但是其一致性的保证放在今天的中间件中依然是很强力的存在。其数据持久化的流程也是非常标准的流程，兼具了性能和一致性的取舍，非常值得我们学习。   1 zk数据同步简述重要知识点：首先ZK的数据分为两部分，磁盘数据和内存数据  磁盘数据：存储在物理介质上的数据（持久化数据），可能与内存数据不一致。 内存数据：zk在启动时">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/zk-log.png">
+<meta property="article:published_time" content="2022-04-05T12:30:00.000Z">
+<meta property="article:modified_time" content="2022-02-16T11:16:20.572Z">
+<meta property="article:author" content="lvqiushi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/zk-log.png"><link rel="shortcut icon" href="/img/icon.png"><link rel="canonical" href="https://lvqiushi.github.io/2022/04/05/zookeeper%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-02-16 19:16:20'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><link rel="stylesheet" href="/css/blog.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="/css/custom.css" ><meta name="generator" content="Hexo 5.4.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/post_img/post-bg.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Lv's Blogs</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">zookeeper如何保证数据一致性</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2022-04-05T12:30:00.000Z" title="undefined 2022-04-05 20:30:00">2022-04-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="zookeeper如何保证数据一致性"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="zookeeper如何保证数据一致性"><a href="#zookeeper如何保证数据一致性" class="headerlink" title="zookeeper如何保证数据一致性"></a>zookeeper如何保证数据一致性</h1><blockquote>
+<p>​        虽说zk是比较老的框架了，但是其一致性的保证放在今天的中间件中依然是很强力的存在。其数据持久化的流程也是非常标准的流程，兼具了性能和一致性的取舍，非常值得我们学习。</p>
+</blockquote>
+<hr>
+<h2 id="1-zk数据同步简述"><a href="#1-zk数据同步简述" class="headerlink" title="1 zk数据同步简述"></a>1 zk数据同步简述</h2><p>重要知识点：首先ZK的数据分为两部分，<strong>磁盘数据和内存数据</strong></p>
+<ul>
+<li>磁盘数据：存储在物理介质上的数据（持久化数据），可能与内存数据不一致。</li>
+<li>内存数据：zk在启动时，会从磁盘上加载数据到内存中，加载数据完成、选举完成、数据同步完成才能对外提供服务，运行期间内，客户端访问的数据都是内存中数据，不会访问磁盘数据。</li>
+</ul>
+<p>ZK总体上来说，使用事务日志持久化的方式来保障被提交的数据不会丢失（也是很多数据库常用的操作），再通过内存数据与磁盘数据隔离的形式，来避免分布式环境下各种数据丢失、错乱的问题产生。</p>
+<p><strong>zk数据写入简要流程</strong></p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/blog_img/zk_simple_write.png" alt="image-20220329201630980"></p>
+<p>结合zk的数据存储以及上述数据写入流程可知，只有当数据被半数以上的zk节点持久化后，ZK的Leader节点才会把该次事务在内存中生效（内存生效才能被客户端访问）。</p>
+<p>因为过半数的节点ACK数据就会写到内存中，所以会存在提交过程中，节点1能读到最新的数据，而节点2读不到，<strong>这也是唯一的数据不一致情况</strong>。而且针对于这种状况，ZK也做了自身的优化，在同一个session内，读写事务顺序是有保证的。<strong>总结为，ZK的数据一致性破坏条件为，只有是不同session的客户端，在数据提交过程中，才可能会读不到最新的数据。</strong></p>
+<h3 id="2-顺序性保障"><a href="#2-顺序性保障" class="headerlink" title="2 顺序性保障"></a>2 顺序性保障</h3><p>zk的leader节点在处理写事务请求时，会额外保留一些中间状态，比方说上次已提交的最大事务id、当前正在等待ack的事务id、当前已经被ack但是还没有写入内存的事务id。</p>
+<p>通过以上三种信息，leader可以用来保障事务通过有序的顺序进行处理，其实本质上类似于单线程在执行二阶段提交的操作，与redis的做法基本类似。</p>
+<p>举个例子，有两个写事务操作，事务A：zxid=1、事务B：zxid=2。</p>
+<p>事务A在等待客户端的ack过半，事务B过来了，则事务B会被阻塞住等待事务A完成。</p>
+<h2 id="3-意外场景举例"><a href="#3-意外场景举例" class="headerlink" title="3 意外场景举例"></a>3 意外场景举例</h2><p>在理论上，不同zk节点间，数据发生意外情况只有以下三种可能。</p>
+<ul>
+<li><p>场景1：有某个zk A节点与集群断联，导致A节点中的数据少于集群中数据（因为集群还在正常对外提供服务）</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/blog_img/zk_scense1.png" alt="image-20220405230258716"></p>
+<p>A节点在重新连接集群时，会触发选举流程，A节点会收到当前集群已经有leader的选票，因为leader目前确实有效（有半数节点认同），所以A节点也认同leader，leader会把follower缺失的数据发送过去跟自己对齐。</p>
+</li>
+<li><p>场景2：有某个zk-leader A节点刚刚发送完proposal后就与集群断联，而其他的节点<strong>选举出了新leader且新的集群没有提交新的事务</strong>。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/blog_img/zk_scense2.png" alt="image-20220405230328094"></p>
+<p>当A节点又可以正常连接集群，会导致A节点中的数据多于集群中数据，这时新leader会把旧leader多出的数据删除掉。</p>
+</li>
+<li><p>场景3：在场景2基础上的特例，当新的leader继续对外服务后，可能会造成之前的leader与现在leader之间的数据有多有少的局面，也可以说是最复杂的场景。<br><img src= "/img/loading.gif" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/blog_img/zk_scense3.png" alt="image-20220405230328094"><br> zk对于这种场景用了很粗暴的方式，当发现数据有多有少后，会直接发送snap把新leader的所有数据覆盖掉A节点的数据，这么设计可能是为了避免出现某些问题，但是也埋下了一些坑，因为snap是比较耗费性能的操作（特别是有超时时间的限制）。</p>
+<p>以上三种场景每种场景我都debug过代码，可以保证描述正确性。<br>如有更多的场景，欢迎找我沟通，互相学习，联系方式在个人主页。</p>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">lvqiushi</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lvqiushi.github.io/2022/04/05/zookeeper%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/">https://lvqiushi.github.io/2022/04/05/zookeeper%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lvqiushi.github.io" target="_blank">Lv's Blogs</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/zk-log.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/02/06/%E4%BC%9A%E5%91%98%E4%BD%93%E7%B3%BB%E8%AE%BE%E8%AE%A1/"><img class="next-cover" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/member_cover.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">会员体系设计</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">lvqiushi</div><div class="author-info__description">If you want,you can.</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">19</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/lvqiushi"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:578915614@qq.com" target="_blank" title=""><i class="fa fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/lvqinglou" target="_blank" title=""><i class="iconfont icon-csdn"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">感谢访问本网站，若喜欢请收藏^_^，如要查看更多文章请点击上方按钮前往csdn浏览</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#zookeeper%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">zookeeper如何保证数据一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-zk%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E7%AE%80%E8%BF%B0"><span class="toc-text">1 zk数据同步简述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E9%A1%BA%E5%BA%8F%E6%80%A7%E4%BF%9D%E9%9A%9C"><span class="toc-text">2 顺序性保障</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%84%8F%E5%A4%96%E5%9C%BA%E6%99%AF%E4%B8%BE%E4%BE%8B"><span class="toc-text">3 意外场景举例</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/04/05/zookeeper%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/" title="zookeeper如何保证数据一致性"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/zk-log.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="zookeeper如何保证数据一致性"/></a><div class="content"><a class="title" href="/2022/04/05/zookeeper%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/" title="zookeeper如何保证数据一致性">zookeeper如何保证数据一致性</a><time datetime="2022-04-05T12:30:00.000Z" title="发表于 2022-04-05 20:30:00">2022-04-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/06/%E4%BC%9A%E5%91%98%E4%BD%93%E7%B3%BB%E8%AE%BE%E8%AE%A1/" title="会员体系设计"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/member_cover.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="会员体系设计"/></a><div class="content"><a class="title" href="/2022/02/06/%E4%BC%9A%E5%91%98%E4%BD%93%E7%B3%BB%E8%AE%BE%E8%AE%A1/" title="会员体系设计">会员体系设计</a><time datetime="2022-02-06T09:20:00.000Z" title="发表于 2022-02-06 17:20:00">2022-02-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/12/03/%E7%BC%93%E5%AD%98%E8%BF%9B%E9%98%B6%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/" title="缓存进阶使用指南"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/use_cache.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="缓存进阶使用指南"/></a><div class="content"><a class="title" href="/2021/12/03/%E7%BC%93%E5%AD%98%E8%BF%9B%E9%98%B6%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/" title="缓存进阶使用指南">缓存进阶使用指南</a><time datetime="2021-12-03T11:00:00.000Z" title="发表于 2021-12-03 19:00:00">2021-12-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/09/28/%E5%80%9F%E5%8A%A9Tomcat%E8%81%8A%E4%B8%80%E4%B8%8B%E9%AB%98%E6%80%A7%E8%83%BDIO%E6%A8%A1%E5%9E%8B-Reactor/" title="借助Tomcat聊一下高性能IO模型-Reactor"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/io-cover.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="借助Tomcat聊一下高性能IO模型-Reactor"/></a><div class="content"><a class="title" href="/2021/09/28/%E5%80%9F%E5%8A%A9Tomcat%E8%81%8A%E4%B8%80%E4%B8%8B%E9%AB%98%E6%80%A7%E8%83%BDIO%E6%A8%A1%E5%9E%8B-Reactor/" title="借助Tomcat聊一下高性能IO模型-Reactor">借助Tomcat聊一下高性能IO模型-Reactor</a><time datetime="2021-09-28T11:00:00.000Z" title="发表于 2021-09-28 19:00:00">2021-09-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/09/G1%E5%9B%9E%E6%94%B6%E5%99%A8%E5%85%A8%E9%9D%A2%E8%A7%A3%E6%9E%90/" title="G1回收器全面解析"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/g1-cover.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="G1回收器全面解析"/></a><div class="content"><a class="title" href="/2021/08/09/G1%E5%9B%9E%E6%94%B6%E5%99%A8%E5%85%A8%E9%9D%A2%E8%A7%A3%E6%9E%90/" title="G1回收器全面解析">G1回收器全面解析</a><time datetime="2021-08-09T11:20:00.000Z" title="发表于 2021-08-09 19:20:00">2021-08-09</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/post_img/post-bg.png')"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2022 By lvqiushi</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
