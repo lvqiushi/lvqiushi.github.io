@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>走进Kafka系列3 创建topic流程 | Lv's Blogs</title><meta name="keywords" content="Kafka"><meta name="author" content="lvqiushi"><meta name="copyright" content="lvqiushi"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="走进Kafka系列3 创建topic流程     上篇文章描述了集群选举的一些概念，本章开始已创建topic为例，讲述一下元数据变更在不同集群间的同步过程。    1 前言是真的没有想到创建一个topic流程居然如此复杂，涉及到了Kafka的很多核心概念，所以理解起来会比较吃力一点。 2 创建topic流程在Kafka中，创建topic总体过程如下（一如既往一图流）  当client端执行创建命令">
+<meta property="og:type" content="article">
+<meta property="og:title" content="走进Kafka系列3 创建topic流程">
+<meta property="og:url" content="https://lvqiushi.github.io/2023/12/25/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%973%20%E5%88%9B%E5%BB%BAtopic%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Lv&#39;s Blogs">
+<meta property="og:description" content="走进Kafka系列3 创建topic流程     上篇文章描述了集群选举的一些概念，本章开始已创建topic为例，讲述一下元数据变更在不同集群间的同步过程。    1 前言是真的没有想到创建一个topic流程居然如此复杂，涉及到了Kafka的很多核心概念，所以理解起来会比较吃力一点。 2 创建topic流程在Kafka中，创建topic总体过程如下（一如既往一图流）  当client端执行创建命令">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/kafka.webp">
+<meta property="article:published_time" content="2023-12-25T12:30:00.000Z">
+<meta property="article:modified_time" content="2024-03-05T16:21:01.032Z">
+<meta property="article:author" content="lvqiushi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/kafka.webp"><link rel="shortcut icon" href="/img/icon.png"><link rel="canonical" href="https://lvqiushi.github.io/2023/12/25/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%973%20%E5%88%9B%E5%BB%BAtopic%E6%B5%81%E7%A8%8B/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-03-06 00:21:01'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><link rel="stylesheet" href="/css/blog.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="/css/custom.css" ><meta name="generator" content="Hexo 5.4.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">23</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/post_img/post-bg.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Lv's Blogs</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于作者</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">走进Kafka系列3 创建topic流程</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon far fa-calendar-alt"></i><span class="post-meta-label">发表于</span><time datetime="2023-12-25T12:30:00.000Z" title="undefined 2023-12-25 20:30:00">2023-12-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Kafka/">Kafka</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="走进Kafka系列3 创建topic流程"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="走进Kafka系列3-创建topic流程"><a href="#走进Kafka系列3-创建topic流程" class="headerlink" title="走进Kafka系列3 创建topic流程"></a>走进Kafka系列3 创建topic流程</h1><blockquote>
+<pre><code>    上篇文章描述了集群选举的一些概念，本章开始已创建topic为例，讲述一下元数据变更在不同集群间的同步过程。
+</code></pre>
+</blockquote>
+<hr>
+<h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1 前言"></a>1 前言</h2><p>是真的没有想到创建一个topic流程居然如此复杂，涉及到了Kafka的很多核心概念，所以理解起来会比较吃力一点。</p>
+<h2 id="2-创建topic流程"><a href="#2-创建topic流程" class="headerlink" title="2 创建topic流程"></a>2 创建topic流程</h2><p><strong>在Kafka中，创建topic总体过程如下</strong>（一如既往一图流）</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/blog_img/kafka_create_topic.png" alt="image-20230602151608686"></p>
+<p>当client端执行创建命令后 </p>
+<p><code>./bin/kafka-topics.sh --bootstrap-server localhost:9092  --create --topic kraft1 --partitions 2 -replication-factor 2</code></p>
+<p>集群leader会根据创建命令，预生成对应的topic和partition的records，随后对records生成event事件投递到队列中开始等待执行。</p>
+<p>当event开始执行时，首先会写入到本地的元数据中（也就是之前提到的__cluster_metadata队列），从这里开始就可以分成两部分讲解了。</p>
+<ol>
+<li><p>leader写入元数据后，随后会将topic和partition应用到内存中，并开始对topic和partition进行初始化操作。最后等待当前leader的offset达到指定位置后，向客户端返回创建结果。</p>
+<p>等待offset：比方说上述例子，创建了一个topic和两个partition，也就是一共3条record元数据，假设一开始leader的hw = 5，则预期中topic和partition同步完成后，hw应该为8。而这个等待就是等到hw = 8的时刻进行回调。</p>
+</li>
+<li><p>当leader写入元数据时，follow还在不停地fetch元数据，当follow fetch到这3个record以后，就会持久化到本地的__cluster_metadata队列，并且推进hw的更新（详见上篇文章）。这样一来就完成了创建的topic动作向整个集群的同步。</p>
+</li>
+</ol>
+<h3 id="3-topic相关概念"><a href="#3-topic相关概念" class="headerlink" title="3 topic相关概念"></a>3 topic相关概念</h3><h3 id="3-1-ISR"><a href="#3-1-ISR" class="headerlink" title="3.1 ISR"></a>3.1 ISR</h3><p>在Kafka的一个topic中，会存在分区的概念，分区数可以由开发者配置指定，并且在之后还可以进行动态添加、删除。</p>
+<p>同时在每个分区中又存在副本的概念（为了保障高可用），副本分为了leader副本和follower副本，follower副本会不间断的向leader副本fetch数据，来保障不同副本间的数据一致性。</p>
+<p>Kafka使用ISR机制来保障单个分区的HA，核心理念为：只有数据比较全的副本才能去竞争成为leader，<strong>而这些副本就是ISR</strong>。</p>
+<p>ISR内的所有副本需要至少满足以下两个条件中的一个</p>
+<ol>
+<li>和leader的LEO一致</li>
+<li>最近一次fetch数据的间隔小于 config.replicaLagTimeMaxMs</li>
+</ol>
+<p>如果都不满足，则副本会被移除ISR队列，反之如果有新的分区满足条件也会被添加到ISR中。</p>
+<p><strong>剔除落后的副本</strong></p>
+<p>在ReplicaManager运行时，会启动一个轮询器，定时轮询每个topic来清除不满足条件的ISR分区。</p>
+<p><code>scheduler.schedule(&quot;isr-expiration&quot;, maybeShrinkIsr _, period = config.replicaLagTimeMaxMs / 2, unit = TimeUnit.MILLISECONDS)</code></p>
+<p><strong>添加满足条件的副本</strong></p>
+<p>当leader收到了follower的fetch请求时，会触发判断follower副本的LEO是否大于leader的HW，如果大于则该副本将会添加到ISR中，并且向其他controller发送ISR变更事件进行同步。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">lvqiushi</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lvqiushi.github.io/2023/12/25/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%973%20%E5%88%9B%E5%BB%BAtopic%E6%B5%81%E7%A8%8B/">https://lvqiushi.github.io/2023/12/25/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%973%20%E5%88%9B%E5%BB%BAtopic%E6%B5%81%E7%A8%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lvqiushi.github.io" target="_blank">Lv's Blogs</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/kafka.webp" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2023/01/28/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%972%20%E9%9B%86%E7%BE%A4%E9%80%89%E4%B8%BE/"><img class="next-cover" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/kafka.webp" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">走进Kafka系列2 集群选举</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">lvqiushi</div><div class="author-info__description">If you want,you can.</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">23</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/lvqiushi"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:578915614@qq.com" target="_blank" title=""><i class="fa fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/lvqinglou" target="_blank" title=""><i class="iconfont icon-csdn"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">感谢访问本网站，若喜欢请收藏^_^，如要查看更多文章请点击上方按钮前往csdn浏览</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%973-%E5%88%9B%E5%BB%BAtopic%E6%B5%81%E7%A8%8B"><span class="toc-text">走进Kafka系列3 创建topic流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%89%8D%E8%A8%80"><span class="toc-text">1 前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E5%88%9B%E5%BB%BAtopic%E6%B5%81%E7%A8%8B"><span class="toc-text">2 创建topic流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-topic%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-text">3 topic相关概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-ISR"><span class="toc-text">3.1 ISR</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/12/25/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%973%20%E5%88%9B%E5%BB%BAtopic%E6%B5%81%E7%A8%8B/" title="走进Kafka系列3 创建topic流程"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/kafka.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="走进Kafka系列3 创建topic流程"/></a><div class="content"><a class="title" href="/2023/12/25/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%973%20%E5%88%9B%E5%BB%BAtopic%E6%B5%81%E7%A8%8B/" title="走进Kafka系列3 创建topic流程">走进Kafka系列3 创建topic流程</a><time datetime="2023-12-25T12:30:00.000Z" title="发表于 2023-12-25 20:30:00">2023-12-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/01/28/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%972%20%E9%9B%86%E7%BE%A4%E9%80%89%E4%B8%BE/" title="走进Kafka系列2 集群选举"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/kafka.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="走进Kafka系列2 集群选举"/></a><div class="content"><a class="title" href="/2023/01/28/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%972%20%E9%9B%86%E7%BE%A4%E9%80%89%E4%B8%BE/" title="走进Kafka系列2 集群选举">走进Kafka系列2 集群选举</a><time datetime="2023-01-28T08:30:00.000Z" title="发表于 2023-01-28 16:30:00">2023-01-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/11/13/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%971%20consumer%20group/" title="走进Kafka系列1 consumer group"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/kafka.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="走进Kafka系列1 consumer group"/></a><div class="content"><a class="title" href="/2022/11/13/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%971%20consumer%20group/" title="走进Kafka系列1 consumer group">走进Kafka系列1 consumer group</a><time datetime="2022-11-13T14:04:00.000Z" title="发表于 2022-11-13 22:04:00">2022-11-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/06/30/%E5%A6%82%E4%BD%95%E6%BB%A1%E8%B6%B3%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E6%8A%A5%E8%A1%A8%E9%9C%80%E6%B1%82/" title="实时数据报表需求技术设计"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/post_topic/report-ill-new.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="实时数据报表需求技术设计"/></a><div class="content"><a class="title" href="/2022/06/30/%E5%A6%82%E4%BD%95%E6%BB%A1%E8%B6%B3%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E6%8A%A5%E8%A1%A8%E9%9C%80%E6%B1%82/" title="实时数据报表需求技术设计">实时数据报表需求技术设计</a><time datetime="2022-06-30T12:23:00.000Z" title="发表于 2022-06-30 20:23:00">2022-06-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/05/zookeeper%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/" title="zookeeper如何保证数据一致性"><img data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/zk-log.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="zookeeper如何保证数据一致性"/></a><div class="content"><a class="title" href="/2022/04/05/zookeeper%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/" title="zookeeper如何保证数据一致性">zookeeper如何保证数据一致性</a><time datetime="2022-04-05T12:30:00.000Z" title="发表于 2022-04-05 20:30:00">2022-04-05</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/post_img/post-bg.png')"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2024 By lvqiushi</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
