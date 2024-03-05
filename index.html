@@ -54,7 +54,7 @@
   isHome: true,
   isHighlightShrink: false,
   isToc: false,
-  postUpdate: '2024-03-06 00:21:44'
+  postUpdate: '2024-03-06 00:41:55'
 }</script><noscript><style type="text/css">
   #nav {
     opacity: 1
@@ -156,7 +156,7 @@ leader写入元数据后，随后会将topic和pa ...</div></div></div><div clas
 1 Kraft选举实现在Kafka3.0中的新特性就是有了Kraft模式来替代之前Zookeeper的依赖（其实从2.8开始就已经支持了）。
 Zookeeper可以理解为一个分布式的KV系统，具有很高的一致性，所以普遍被用来储存元数据使用。
 但因ZK自身缺陷，所以Kafka选择使用了自己内部的topic来储存元数据，在这基础上就是Kraft模式（使用了raft协议的思想）
-1.1 Kraft相关基础概念一般来说，中心化的分布式系统都需要进行集群选举来产生Leader，Leader主要作用是为了更容易控制整个集群状态的一致性。在Kraft中，把集群的元数据信息都储存到了Kafka自身的topic (__cluster_metadata) 中来摆脱对ZK的依赖 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2022/11/13/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%971%20consumer%20group/" title="走进Kafka系列1 consumer group">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/kafka.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="走进Kafka系列1 consumer group"></a></div><div class="recent-post-info"><a class="article-title" href="/2022/11/13/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%971%20consumer%20group/" title="走进Kafka系列1 consumer group">走进Kafka系列1 consumer group</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2022-11-13T14:04:00.000Z" title="发表于 2022-11-13 22:04:00">2022-11-13</time></span></div><div class="content">走进Kafka系列1 consumer group
+1.1 Kraft相关基础概念一般来说，中心化的分布式系统都需要进行集群选举来产生Leader，Leader主要作用是为了更容易控制整个集群状态的一致性。在Kraft中，把集群的元数据信息都储存到了Kafka自身的topic (__cluster_metadata) 中来摆脱对ZK的依赖 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2022/11/13/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%971%20consumer%20group/" title="走进Kafka系列1 consumer group">     <img class="post_bg" data-lazy-src="https://blog-1300543039.cos.ap-guangzhou.myqcloud.com/cover/kafka.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="走进Kafka系列1 consumer group"></a></div><div class="recent-post-info"><a class="article-title" href="/2022/11/13/%E8%B5%B0%E8%BF%9BKafka%E7%B3%BB%E5%88%971%20consumer%20group/" title="走进Kafka系列1 consumer group">走进Kafka系列1 consumer group</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2022-11-13T14:04:00.000Z" title="发表于 2022-11-13 22:04:00">2022-11-13</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/Kafka/">Kafka</a></span></div><div class="content">走进Kafka系列1 consumer group
 ​        本篇文章基于Kafka3.0，为Kafka系列的开篇之作，接下来的一段时间内，会着重投入研究Kafka。本期讲解的是consumer group概念，可以算是Kafka中比较重要的一个部分。
 
 
